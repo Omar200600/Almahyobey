@@ -452,7 +452,7 @@
     <div class="quick-nav">
         <button class="nav-pill" onclick="moveCameraTo(0, 1.7, 3.8, 0)">🏛️ مدخل الصالة</button>
         <button class="nav-pill" onclick="moveCameraTo(0, 1.7, -0.3, 0)">💼 إلى مكتب الاستقبال</button>
-        <button class="nav-pill" onclick="moveCameraTo(-2.1, 1.7, -0.5, Math.PI / 2)">🖥️ شاشة العروض المنفصلة</button>
+        <button class="nav-pill" onclick="moveCameraTo(2.4, 1.7, -1.6, -Math.PI / 2)">🖥️ شاشة العروض المنفصلة</button>
     </div>
 
     <div class="controls-pad">
@@ -591,28 +591,192 @@
             playerState.isTeleporting = true;
         }
 
-        function createMarbleTexture() {
+        // أرضية رخام واضحة الألوان مع نقشة هندسية ذهبية وزرقاء وعروق رخام طبيعية
+        function createLuxuryMarbleTexture() {
             const canvas = document.createElement('canvas');
-            canvas.width = 256; canvas.height = 256;
+            canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#f3efe6';
-            ctx.fillRect(0, 0, 256, 256);
-            ctx.strokeStyle = 'rgba(195, 182, 160, 0.35)';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 12; i++) {
+
+            // لون رخام بيج دافئ وواضح
+            const grad = ctx.createLinearGradient(0, 0, 512, 512);
+            grad.addColorStop(0, '#e6d8c3');
+            grad.addColorStop(0.5, '#d8c5a8');
+            grad.addColorStop(1, '#e3d4bc');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 512, 512);
+
+            // عروق رخام واضحة بلون ذهبي وبني دافئ
+            for (let i = 0; i < 20; i++) {
                 ctx.beginPath();
-                ctx.moveTo(Math.random() * 256, 0);
-                ctx.bezierCurveTo(Math.random() * 256, 85, Math.random() * 256, 170, Math.random() * 256, 256);
+                ctx.strokeStyle = i % 2 === 0 ? 'rgba(176, 132, 54, 0.35)' : 'rgba(128, 102, 72, 0.3)';
+                ctx.lineWidth = i % 3 === 0 ? 3 : 1.8;
+                ctx.moveTo(Math.random() * 512, Math.random() * 512);
+                ctx.bezierCurveTo(
+                    Math.random() * 512, Math.random() * 512,
+                    Math.random() * 512, Math.random() * 512,
+                    Math.random() * 512, Math.random() * 512
+                );
                 ctx.stroke();
             }
-            ctx.strokeStyle = 'rgba(180, 165, 140, 0.45)';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(0, 0, 256, 256);
+
+            // شبكة هندسية وبلاطات واضحة لكل بلاطة (256x256)
+            [0, 256].forEach((ox) => {
+                [0, 256].forEach((oy) => {
+                    ctx.save();
+                    ctx.translate(ox, oy);
+
+                    // إطار البلاطة
+                    ctx.strokeStyle = '#9e7432';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(2, 2, 252, 252);
+
+                    // معين ذهبي داخل البلاطة
+                    ctx.strokeStyle = '#c4933f';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(128, 12);
+                    ctx.lineTo(244, 128);
+                    ctx.lineTo(128, 244);
+                    ctx.lineTo(12, 128);
+                    ctx.closePath();
+                    ctx.stroke();
+
+                    // خطوط زرقاء أنيقة
+                    ctx.strokeStyle = '#3d7494';
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    ctx.moveTo(20, 20); ctx.lineTo(236, 236);
+                    ctx.moveTo(236, 20); ctx.lineTo(20, 236);
+                    ctx.stroke();
+
+                    // زخرفة مركزية واضحة
+                    ctx.fillStyle = '#14493b';
+                    ctx.beginPath();
+                    ctx.arc(128, 128, 10, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#d4af37';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(128, 128, 16, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    ctx.restore();
+                });
+            });
+
             const tex = new THREE.CanvasTexture(canvas);
             tex.wrapS = THREE.RepeatWrapping;
             tex.wrapT = THREE.RepeatWrapping;
-            tex.repeat.set(8, 10);
+            tex.repeat.set(6, 7);
             return tex;
+        }
+
+        // واجهة طاولة المكتب بلون رمادي فحمي عصري مذهل مع زخرفة هندسية ذهبية
+        function createModernDeskTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+
+            const grad = ctx.createLinearGradient(0, 0, 0, 128);
+            grad.addColorStop(0, '#232c33');
+            grad.addColorStop(1, '#192026');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 256, 128);
+
+            const step = 64;
+            for (let x = 0; x < 256; x += step) {
+                for (let y = 0; y < 128; y += step) {
+                    ctx.fillStyle = '#2d3840';
+                    ctx.beginPath();
+                    ctx.arc(x + step / 2, y + step / 2, 18, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#d4af37';
+                    ctx.lineWidth = 4.5;
+                    ctx.beginPath();
+                    ctx.moveTo(x + step / 2, y);
+                    ctx.lineTo(x + step, y + step / 2);
+                    ctx.lineTo(x + step / 2, y + step);
+                    ctx.lineTo(x, y + step / 2);
+                    ctx.closePath();
+                    ctx.stroke();
+
+                    ctx.strokeStyle = 'rgba(212, 175, 55, 0.55)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(x + step / 2, y);
+                    ctx.lineTo(x + step / 2, y + step);
+                    ctx.moveTo(x, y + step / 2);
+                    ctx.lineTo(x + step, y + step / 2);
+                    ctx.stroke();
+                }
+            }
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = THREE.RepeatWrapping;
+            tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(4, 1);
+            return tex;
+        }
+
+        // سقف سحابي أزرق متدرج مع غيوم وطائرات
+        function createSkyCeilingTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024; canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+
+            const grad = ctx.createLinearGradient(0, 0, 1024, 1024);
+            grad.addColorStop(0, '#7eb4e2');
+            grad.addColorStop(0.5, '#9ec9ec');
+            grad.addColorStop(1, '#c5dff5');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 1024, 1024);
+
+            ctx.fillStyle = 'rgba(250, 248, 244, 0.92)';
+            const drawCloudGroup = (cx, cy, scale) => {
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.scale(scale, scale);
+                ctx.beginPath();
+                ctx.arc(0, 0, 55, 0, Math.PI * 2);
+                ctx.arc(48, -10, 65, 0, Math.PI * 2);
+                ctx.arc(105, 5, 52, 0, Math.PI * 2);
+                ctx.arc(-50, 8, 48, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            };
+
+            drawCloudGroup(150, 150, 1.3);
+            drawCloudGroup(840, 180, 1.25);
+            drawCloudGroup(180, 850, 1.35);
+            drawCloudGroup(830, 840, 1.2);
+
+            const drawPlane = (px, py, angle, s) => {
+                ctx.save();
+                ctx.translate(px, py);
+                ctx.rotate(angle);
+                ctx.scale(s, s);
+                ctx.fillStyle = '#f7f4ee';
+                ctx.beginPath();
+                ctx.ellipse(0, 0, 48, 9, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(-5, -6); ctx.lineTo(-22, -42); ctx.lineTo(-34, -42); ctx.lineTo(-18, -6); ctx.closePath();
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(-5, 6); ctx.lineTo(-22, 42); ctx.lineTo(-34, 42); ctx.lineTo(-18, 6); ctx.closePath();
+                ctx.fill();
+                ctx.beginPath();
+                ctx.moveTo(-36, -4); ctx.lineTo(-48, -20); ctx.lineTo(-54, -20); ctx.lineTo(-44, -4); ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            };
+
+            drawPlane(620, 320, -0.45, 1.1);
+            drawPlane(360, 660, 0.35, 0.9);
+
+            return new THREE.CanvasTexture(canvas);
         }
 
         function createMonitorTexture() {
@@ -637,37 +801,54 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // لوحة خلفية المكتب مع عبارة الشهادة و "نحن نعمل لأجل راحتكم"
         function createMainWallBoardTexture() {
             const canvas = document.createElement('canvas');
             canvas.width = 1024; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#0e3b2e';
+
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, 512);
+            bgGrad.addColorStop(0, '#8ec2ec');
+            bgGrad.addColorStop(0.55, '#d7ebf9');
+            bgGrad.addColorStop(1, '#f7f3ea');
+            ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, 1024, 512);
 
             ctx.strokeStyle = '#d4af37';
-            ctx.lineWidth = 14;
-            ctx.strokeRect(20, 20, 984, 472);
+            ctx.lineWidth = 10;
+            ctx.strokeRect(16, 16, 992, 480);
 
-            // شهادة التوحيد في الأعلى
-            ctx.fillStyle = '#d4af37';
-            ctx.font = 'bold 52px Tahoma, sans-serif';
+            ctx.fillStyle = '#0e3b2e';
+            ctx.font = 'bold 44px Tahoma, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('لا إله إلا الله محمد رسول الله', 512, 130);
+            ctx.fillText('لا إله إلا الله محمد رسول الله', 512, 82);
 
-            // اسم المكتب
+            ctx.fillStyle = '#124838';
+            ctx.font = 'bold 54px Tahoma, sans-serif';
+            ctx.fillText('مكتب المهيوبـي للسياحة والسفريات', 512, 148);
+
+            ctx.fillStyle = '#9c6a22';
+            ctx.font = 'bold 34px Tahoma, sans-serif';
+            ctx.fillText('نحن نعمل لأجل راحتكم', 512, 202);
+
+            ctx.fillStyle = '#e9e1d1';
+            ctx.beginPath();
+            ctx.moveTo(0, 512);
+            ctx.lineTo(0, 340);
+            ctx.lineTo(90, 340);
+            ctx.lineTo(120, 235);
+            ctx.lineTo(150, 340);
+            ctx.lineTo(240, 340);
+            ctx.lineTo(240, 260); ctx.lineTo(280, 260); ctx.lineTo(280, 340);
+            ctx.arc(512, 330, 88, Math.PI, 0);
+            ctx.lineTo(740, 340);
+            ctx.lineTo(780, 240); ctx.lineTo(820, 340);
+            ctx.lineTo(910, 340); ctx.lineTo(910, 270); ctx.lineTo(960, 270); ctx.lineTo(960, 340);
+            ctx.lineTo(1024, 340); ctx.lineTo(1024, 512);
+            ctx.closePath();
+            ctx.fill();
+
             ctx.fillStyle = '#fdfbf7';
-            ctx.font = 'bold 64px Tahoma, sans-serif';
-            ctx.fillText('مكتب المهيوبـي', 512, 245);
-
-            // عبارة نحن نعمل لأجل راحتكم
-            ctx.fillStyle = '#d4af37';
-            ctx.font = 'bold 38px Tahoma, sans-serif';
-            ctx.fillText('نحن نعمل لأجل راحتكم', 512, 345);
-
-            ctx.fillStyle = '#c5d8cd';
-            ctx.font = '28px Tahoma, sans-serif';
-            ctx.fillText('للحج والعمرة وتذاكر السفر الدولية', 512, 415);
+            ctx.fillRect(0, 395, 1024, 117);
 
             return new THREE.CanvasTexture(canvas);
         }
@@ -676,41 +857,176 @@
             const canvas = document.createElement('canvas');
             canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#f5efe2';
+
+            ctx.fillStyle = '#f7f2e7';
             ctx.fillRect(0, 0, 512, 512);
             ctx.strokeStyle = '#0e3b2e';
             ctx.lineWidth = 18;
-            ctx.strokeRect(18, 18, 476, 476);
+            ctx.strokeRect(16, 16, 480, 480);
             ctx.strokeStyle = '#d4af37';
             ctx.lineWidth = 6;
-            ctx.strokeRect(34, 34, 444, 444);
+            ctx.strokeRect(32, 32, 448, 448);
+
+            ctx.textAlign = 'center';
 
             if (type === 'makkah') {
-                ctx.fillStyle = '#1b1d1c';
-                ctx.fillRect(166, 175, 180, 195);
+                const sky = ctx.createLinearGradient(0, 45, 0, 360);
+                sky.addColorStop(0, '#10293d');
+                sky.addColorStop(1, '#2b526e');
+                ctx.fillStyle = sky;
+                ctx.fillRect(45, 45, 422, 315);
+
+                ctx.fillStyle = '#f5d77f';
+                ctx.beginPath(); ctx.arc(395, 95, 18, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#15324a';
+                ctx.beginPath(); ctx.arc(403, 90, 15, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = '#e8dec8';
+                ctx.fillRect(95, 130, 18, 230);
+                ctx.fillRect(399, 130, 18, 230);
                 ctx.fillStyle = '#d4af37';
-                ctx.fillRect(166, 215, 180, 22);
-                ctx.fillRect(285, 265, 34, 65);
+                ctx.beginPath(); ctx.arc(104, 126, 10, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(408, 126, 10, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = '#141615';
+                ctx.fillRect(176, 175, 160, 185);
+                ctx.fillStyle = '#d4af37';
+                ctx.fillRect(176, 208, 160, 20);
+                ctx.fillRect(285, 255, 28, 58);
+
                 ctx.fillStyle = '#0e3b2e';
-                ctx.font = 'bold 34px Tahoma, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('مكة المكرمة - بيت الله الحرام', 256, 430);
-            } else {
+                ctx.font = 'bold 30px Tahoma, sans-serif';
+                ctx.fillText('بيت الله الحرام - مكة المكرمة', 256, 412);
+                ctx.fillStyle = '#9c6a22';
+                ctx.font = 'bold 22px Tahoma, sans-serif';
+                ctx.fillText('لبيك اللهم لبيك', 256, 450);
+
+            } else if (type === 'madinah') {
+                const sky = ctx.createLinearGradient(0, 45, 0, 360);
+                sky.addColorStop(0, '#d7ebf9');
+                sky.addColorStop(1, '#f4efe2');
+                ctx.fillStyle = sky;
+                ctx.fillRect(45, 45, 422, 315);
+
                 ctx.fillStyle = '#156b48';
                 ctx.beginPath();
-                ctx.arc(256, 260, 95, Math.PI, 0);
+                ctx.arc(256, 255, 92, Math.PI, 0);
                 ctx.fill();
                 ctx.fillStyle = '#e8dfc8';
-                ctx.fillRect(145, 260, 222, 105);
+                ctx.fillRect(145, 255, 222, 105);
+                ctx.fillStyle = '#d4af37';
+                ctx.beginPath(); ctx.arc(256, 148, 14, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = '#0e3b2e';
+                ctx.font = 'bold 30px Tahoma, sans-serif';
+                ctx.fillText('المسجد النبوي الشريف', 256, 412);
+                ctx.fillStyle = '#9c6a22';
+                ctx.font = 'bold 22px Tahoma, sans-serif';
+                ctx.fillText('المدينة المنورة - طيبة الطيبة', 256, 450);
+
+            } else if (type === 'tourism') {
+                const sky = ctx.createLinearGradient(0, 45, 0, 360);
+                sky.addColorStop(0, '#4ca1af');
+                sky.addColorStop(1, '#c4e0e5');
+                ctx.fillStyle = sky;
+                ctx.fillRect(45, 45, 422, 315);
+
+                ctx.fillStyle = '#ffdf78';
+                ctx.beginPath(); ctx.arc(115, 110, 32, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath(); ctx.ellipse(340, 105, 34, 7, -0.2, 0, Math.PI * 2); ctx.fill();
+
+                ctx.fillStyle = '#2d6a4f';
+                ctx.beginPath();
+                ctx.moveTo(45, 310); ctx.lineTo(145, 185); ctx.lineTo(245, 310); ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#1b4965';
+                ctx.fillRect(45, 305, 422, 55);
+
                 ctx.fillStyle = '#d4af37';
                 ctx.beginPath();
-                ctx.arc(256, 148, 14, 0, Math.PI * 2);
+                ctx.moveTo(310, 305); ctx.lineTo(335, 175); ctx.lineTo(360, 305); ctx.closePath();
                 ctx.fill();
+
                 ctx.fillStyle = '#0e3b2e';
+                ctx.font = 'bold 30px Tahoma, sans-serif';
+                ctx.fillText('وجهات سياحية حول العالم', 256, 412);
+                ctx.fillStyle = '#9c6a22';
+                ctx.font = 'bold 22px Tahoma, sans-serif';
+                ctx.fillText('رحلات ممتعة وتنظيم متكامل', 256, 450);
+
+            } else if (type === 'quote_comfort') {
+                ctx.fillStyle = '#0e3b2e';
+                ctx.fillRect(45, 45, 422, 422);
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = 5;
+                ctx.strokeRect(62, 62, 388, 388);
+
+                ctx.fillStyle = '#d4af37';
+                ctx.font = 'bold 26px Tahoma, sans-serif';
+                ctx.fillText('✦ مكتب المهيوبـي ✦', 256, 135);
+
+                ctx.fillStyle = '#fdfbf7';
+                ctx.font = 'bold 48px Tahoma, sans-serif';
+                ctx.fillText('نسعى لراحتكم', 256, 245);
+
+                ctx.fillStyle = '#d4af37';
+                ctx.font = 'bold 26px Tahoma, sans-serif';
+                ctx.fillText('ونحن في خدمتكم دائماً', 256, 325);
+
+                ctx.fillStyle = '#c5d8cd';
+                ctx.font = '20px Tahoma, sans-serif';
+                ctx.fillText('ثقتكم غايتنا وسعادتكم هدفنا', 256, 395);
+
+            } else if (type === 'quote_tranquility') {
+                ctx.fillStyle = '#18242b';
+                ctx.fillRect(45, 45, 422, 422);
+                ctx.strokeStyle = '#d4af37';
+                ctx.lineWidth = 5;
+                ctx.strokeRect(62, 62, 388, 388);
+
+                ctx.fillStyle = '#d4af37';
+                ctx.font = 'bold 26px Tahoma, sans-serif';
+                ctx.fillText('🕋 الحج والعمرة 🕋', 256, 130);
+
+                ctx.fillStyle = '#fdfbf7';
+                ctx.font = 'bold 42px Tahoma, sans-serif';
+                ctx.fillText('رحلة طمأنينة', 256, 230);
+
+                ctx.fillStyle = '#d4af37';
                 ctx.font = 'bold 34px Tahoma, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('المدينة المنورة - المسجد النبوي', 256, 430);
+                ctx.fillText('إلى الأماكن المقدسة', 256, 300);
+
+                ctx.fillStyle = '#cfd8dc';
+                ctx.font = '21px Tahoma, sans-serif';
+                ctx.fillText('رعاية متكاملة من لحظة انطلاقك', 256, 385);
+
+            } else {
+                ctx.fillStyle = '#f2eadc';
+                ctx.fillRect(45, 45, 422, 422);
+                ctx.strokeStyle = '#0e3b2e';
+                ctx.lineWidth = 5;
+                ctx.strokeRect(62, 62, 388, 388);
+
+                ctx.fillStyle = '#9c6a22';
+                ctx.font = 'bold 28px Tahoma, sans-serif';
+                ctx.fillText('أهلاً ومرحباً بكم', 256, 145);
+
+                ctx.fillStyle = '#0e3b2e';
+                ctx.font = 'bold 40px Tahoma, sans-serif';
+                ctx.fillText('نحن في خدمتكم', 256, 240);
+
+                ctx.fillStyle = '#165946';
+                ctx.font = 'bold 28px Tahoma, sans-serif';
+                ctx.fillText('لإنجاز حجوزاتكم بكل يسر', 256, 315);
+
+                ctx.fillStyle = '#9c6a22';
+                ctx.font = 'bold 22px Tahoma, sans-serif';
+                ctx.fillText('سفر آمن • خدمة راقية • التزام تام', 256, 390);
             }
+
             return new THREE.CanvasTexture(canvas);
         }
 
@@ -764,7 +1080,7 @@
                 ctx.fillRect(80, 110, 16, 55);
                 ctx.fillRect(144, 130, 32, 25);
                 ctx.fillRect(160, 95, 16, 60);
-            } else if (type === 'palm') {
+            } else {
                 ctx.fillStyle = '#7a5230';
                 ctx.fillRect(120, 150, 16, 125);
                 ctx.fillStyle = '#227842';
@@ -777,19 +1093,6 @@
                     ctx.fill();
                     ctx.restore();
                 }
-            } else {
-                ctx.fillStyle = '#5c3a21';
-                ctx.fillRect(122, 160, 12, 115);
-                ctx.fillStyle = '#166946';
-                ctx.beginPath();
-                ctx.arc(128, 120, 65, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#1e8253';
-                ctx.beginPath();
-                ctx.arc(105, 105, 42, 0, Math.PI * 2);
-                ctx.arc(150, 105, 42, 0, Math.PI * 2);
-                ctx.arc(128, 80, 45, 0, Math.PI * 2);
-                ctx.fill();
             }
             return new THREE.CanvasTexture(canvas);
         }
@@ -797,8 +1100,8 @@
         function init3DOffice() {
             const container = document.getElementById('canvas-container');
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xeae2d3);
-            scene.fog = new THREE.Fog(0xeae2d3, 10, 22);
+            scene.background = new THREE.Color(0xd8cbb8);
+            scene.fog = new THREE.Fog(0xd8cbb8, 11, 23);
 
             camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 40);
             camera.position.set(playerState.x, PLAYER_HEIGHT, playerState.z);
@@ -808,51 +1111,115 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
             container.appendChild(renderer.domElement);
 
-            const hemiLight = new THREE.HemisphereLight(0xfffaf0, 0xd8cbb8, 1.05);
+            // إضاءة متوازنة تحافظ على وضوح ألوان الأرضية دون تبييض زائد
+            const hemiLight = new THREE.HemisphereLight(0xfff8eb, 0xb8a384, 0.92);
             scene.add(hemiLight);
 
-            const dirLight = new THREE.DirectionalLight(0xfff4dc, 0.65);
+            const dirLight = new THREE.DirectionalLight(0xffecc9, 0.55);
             dirLight.position.set(3, 6, 4);
             scene.add(dirLight);
 
-            const marbleMat = new THREE.MeshLambertMaterial({ map: createMarbleTexture() });
+            const floorMat = new THREE.MeshLambertMaterial({ map: createLuxuryMarbleTexture() });
             const creamWallMat = new THREE.MeshLambertMaterial({ color: 0xf4eee1 });
-            const emeraldWallMat = new THREE.MeshLambertMaterial({ color: 0x0e3b2e });
+            const trimWallMat = new THREE.MeshLambertMaterial({ color: 0xe6decb });
             const goldMat = new THREE.MeshLambertMaterial({ color: 0xd4af37 });
-            const woodMat = new THREE.MeshLambertMaterial({ color: 0x5c3a21 });
-            const chairMat = new THREE.MeshLambertMaterial({ color: 0x124838 }); // لون الكراسي المطابق للصور
+            const walnutWoodMat = new THREE.MeshLambertMaterial({ color: 0x6e472b });
+            const lightWoodMat = new THREE.MeshLambertMaterial({ color: 0xc99e67 });
+            const chairMat = new THREE.MeshLambertMaterial({ color: 0x164a3c });
 
             const roomW = 9, roomD = 11, roomH = 3.8;
 
-            const floor = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD), marbleMat);
+            // الأرضية الرخامية الواضحة
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD), floorMat);
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
 
-            const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomD), creamWallMat);
+            // وزرات (خطوط الفصل بين الأرضية والجدران) على جميع الجدران
+            const skirtingH = 0.16;
+            const skirtingThick = 0.06;
+
+            const backSkirting = new THREE.Mesh(new THREE.BoxGeometry(roomW, skirtingH, skirtingThick), walnutWoodMat);
+            backSkirting.position.set(0, skirtingH / 2, -roomD / 2 + skirtingThick / 2);
+            scene.add(backSkirting);
+
+            const backSkirtingGold = new THREE.Mesh(new THREE.BoxGeometry(roomW, 0.03, skirtingThick + 0.01), goldMat);
+            backSkirtingGold.position.set(0, skirtingH + 0.015, -roomD / 2 + skirtingThick / 2);
+            scene.add(backSkirtingGold);
+
+            const frontSkirting = new THREE.Mesh(new THREE.BoxGeometry(roomW, skirtingH, skirtingThick), walnutWoodMat);
+            frontSkirting.position.set(0, skirtingH / 2, roomD / 2 - skirtingThick / 2);
+            scene.add(frontSkirting);
+
+            const frontSkirtingGold = new THREE.Mesh(new THREE.BoxGeometry(roomW, 0.03, skirtingThick + 0.01), goldMat);
+            frontSkirtingGold.position.set(0, skirtingH + 0.015, roomD / 2 - skirtingThick / 2);
+            scene.add(frontSkirtingGold);
+
+            const leftSkirting = new THREE.Mesh(new THREE.BoxGeometry(skirtingThick, skirtingH, roomD), walnutWoodMat);
+            leftSkirting.position.set(-roomW / 2 + skirtingThick / 2, skirtingH / 2, 0);
+            scene.add(leftSkirting);
+
+            const leftSkirtingGold = new THREE.Mesh(new THREE.BoxGeometry(skirtingThick + 0.01, 0.03, roomD), goldMat);
+            leftSkirtingGold.position.set(-roomW / 2 + skirtingThick / 2, skirtingH + 0.015, 0);
+            scene.add(leftSkirtingGold);
+
+            const rightSkirting = new THREE.Mesh(new THREE.BoxGeometry(skirtingThick, skirtingH, roomD), walnutWoodMat);
+            rightSkirting.position.set(roomW / 2 - skirtingThick / 2, skirtingH / 2, 0);
+            scene.add(rightSkirting);
+
+            const rightSkirtingGold = new THREE.Mesh(new THREE.BoxGeometry(skirtingThick + 0.01, 0.03, roomD), goldMat);
+            rightSkirtingGold.position.set(roomW / 2 - skirtingThick / 2, skirtingH + 0.015, 0);
+            scene.add(rightSkirtingGold);
+
+            // السقف السحابي مع غيوم وطائرات بارزة
+            const ceiling = new THREE.Mesh(
+                new THREE.PlaneGeometry(roomW, roomD),
+                new THREE.MeshLambertMaterial({ map: createSkyCeilingTexture() })
+            );
             ceiling.rotation.x = Math.PI / 2;
             ceiling.position.y = roomH;
             scene.add(ceiling);
 
-            // جدران مقسمة إلى مستطيلات رأسية أنيقة
+            const cloudMat = new THREE.MeshLambertMaterial({ color: 0xfaf6ef });
+            const planeMat = new THREE.MeshLambertMaterial({ color: 0xf2ece1 });
+
+            [[-2.2, -1.5], [2.1, -1.2], [-2.0, 2.2], [2.2, 2.0]].forEach(([cx, cz]) => {
+                const cloudPuff = new THREE.Mesh(new THREE.SphereGeometry(0.45, 12, 10), cloudMat);
+                cloudPuff.scale.set(1.4, 0.35, 1.0);
+                cloudPuff.position.set(cx, roomH - 0.12, cz);
+                scene.add(cloudPuff);
+            });
+
+            const ceilingPlane = new THREE.Group();
+            const fuselage = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.9, 10), planeMat);
+            fuselage.rotation.x = Math.PI / 2;
+            const wings = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.03, 0.22), planeMat);
+            const tail = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.03, 0.14), planeMat);
+            tail.position.z = -0.36;
+            ceilingPlane.add(fuselage, wings, tail);
+            ceilingPlane.position.set(0.6, roomH - 0.28, -0.5);
+            ceilingPlane.rotation.y = -0.4;
+            scene.add(ceilingPlane);
+
+            // الجدران
             const backWall = new THREE.Mesh(new THREE.PlaneGeometry(roomW, roomH), creamWallMat);
             backWall.position.set(0, roomH / 2, -roomD / 2);
             scene.add(backWall);
 
-            // عمل مستطيلات رأسية على الحائط الخلفي والجانبي
-            for (let i = -3.5; i <= 3.5; i += 2.2) {
-                const vPanel = new THREE.Mesh(new THREE.BoxGeometry(0.08, 3.2, 0.04), emeraldWallMat);
-                vPanel.position.set(i, 1.7, -roomD / 2 + 0.02);
-                scene.add(vPanel);
-            }
+            [-3.4, 3.4].forEach((xPos) => {
+                const sidePillar = new THREE.Mesh(new THREE.BoxGeometry(1.6, roomH, 0.08), trimWallMat);
+                sidePillar.position.set(xPos, roomH / 2, -roomD / 2 + 0.04);
+                scene.add(sidePillar);
+            });
 
-            // اللوحة الخلفية الكبرى خلف مكتب الاستقبال (تتضمن الشهادة والعبارات)
-            const mainBoardGeo = new THREE.BoxGeometry(5.0, 2.4, 0.08);
-            const mainBoardMat = new THREE.MeshLambertMaterial({ map: createMainWallBoardTexture() });
-            const mainBoard = new THREE.Mesh(mainBoardGeo, mainBoardMat);
+            // اللوحة الخلفية الكبرى خلف مكتب الاستقبال
+            const mainBoard = new THREE.Mesh(
+                new THREE.BoxGeometry(5.2, 2.55, 0.08),
+                new THREE.MeshLambertMaterial({ map: createMainWallBoardTexture() })
+            );
             mainBoard.position.set(0, 2.2, -roomD / 2 + 0.06);
             scene.add(mainBoard);
 
-            const mainBoardBorder = new THREE.Mesh(new THREE.BoxGeometry(5.16, 2.56, 0.04), goldMat);
+            const mainBoardBorder = new THREE.Mesh(new THREE.BoxGeometry(5.36, 2.7, 0.04), goldMat);
             mainBoardBorder.position.set(0, 2.2, -roomD / 2 + 0.04);
             scene.add(mainBoardBorder);
 
@@ -871,16 +1238,30 @@
             rightWall.position.set(roomW / 2, roomH / 2, 0);
             scene.add(rightWall);
 
-            // لوحات الحائط الجانبية (مكة والمدينة) في مكان مستقل وبعيد عن الشاشة
-            const makkahArt = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.4, 1.4), new THREE.MeshLambertMaterial({ map: createWallArtTexture('makkah') }));
-            makkahArt.position.set(roomW / 2 - 0.05, 1.9, 2.2);
-            scene.add(makkahArt);
+            // اللوحات الجدارية بإطار ذهبي بارز
+            function addFramedWallArt(type, x, y, z, rotY) {
+                const group = new THREE.Group();
+                const frame = new THREE.Mesh(new THREE.BoxGeometry(1.38, 1.38, 0.04), goldMat);
+                const art = new THREE.Mesh(
+                    new THREE.BoxGeometry(1.28, 1.28, 0.06),
+                    new THREE.MeshLambertMaterial({ map: createWallArtTexture(type) })
+                );
+                art.position.z = 0.015;
+                group.add(frame, art);
+                group.position.set(x, y, z);
+                group.rotation.y = rotY;
+                scene.add(group);
+            }
 
-            const madinahArt = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.4, 1.4), new THREE.MeshLambertMaterial({ map: createWallArtTexture('madinah') }));
-            madinahArt.position.set(roomW / 2 - 0.05, 1.9, 0.4);
-            scene.add(madinahArt);
+            addFramedWallArt('quote_comfort',     -roomW / 2 + 0.04, 1.95, -2.5,  Math.PI / 2);
+            addFramedWallArt('makkah',            -roomW / 2 + 0.04, 1.95, -0.6,  Math.PI / 2);
+            addFramedWallArt('madinah',           -roomW / 2 + 0.04, 1.95,  1.3,  Math.PI / 2);
+            addFramedWallArt('quote_tranquility', -roomW / 2 + 0.04, 1.95,  3.2,  Math.PI / 2);
 
-            // شاشة العروض بجوار المكتب (بمكان منفصل وبحجم مناسب وبرواز فاخر)
+            addFramedWallArt('tourism',           roomW / 2 - 0.04, 1.95,  0.8, -Math.PI / 2);
+            addFramedWallArt('quote_service',     roomW / 2 - 0.04, 1.95,  2.7, -Math.PI / 2);
+
+            // شاشة العروض التفاعلية على الجدار الأيمن
             slideTextures = [
                 createDefaultSlideTexture('مكتب المهيوبـي للسياحة والسفريات', 'خدمات متكاملة لضيوف الرحمن - حج وعمرة وتذاكر دولية', '✨ أهلاً بكم في مكتبنا الافتراضي ✨'),
                 createDefaultSlideTexture('باقات العمرة المميزة لعام 1448هـ', 'نقل حديث - فنادق مطلة على الحرم - إشراف متكامل', '🕋 عروض العمرة المباركة 🕋'),
@@ -890,14 +1271,14 @@
             const screenGeo = new THREE.BoxGeometry(0.08, 1.3, 2.0);
             const screenMat = new THREE.MeshBasicMaterial({ map: slideTextures[0] });
             slideScreenMesh = new THREE.Mesh(screenGeo, screenMat);
-            slideScreenMesh.position.set(roomW / 2 - 0.1, 1.9, -1.8);
+            slideScreenMesh.position.set(roomW / 2 - 0.1, 1.95, -1.6);
             scene.add(slideScreenMesh);
 
             const screenBorder = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.42, 2.12), goldMat);
-            screenBorder.position.set(roomW / 2 - 0.08, 1.9, -1.8);
+            screenBorder.position.set(roomW / 2 - 0.08, 1.95, -1.6);
             scene.add(screenBorder);
 
-            // أشجار الزينة برمجياً
+            // أشجار الزينة في الزوايا
             function addPlantCorner(x, z, type) {
                 const mat = new THREE.SpriteMaterial({ map: createProceduralPlantTexture(type), transparent: true });
                 const sprite = new THREE.Sprite(mat);
@@ -909,70 +1290,79 @@
             addPlantCorner(-3.6, -4.5, 'cactus');
             addPlantCorner(3.6, -4.5, 'palm');
 
-            // Reception Desk
+            // طاولة المكتب بلون عصري مذهل (رمادي فحمي ملكي مع نقشة ذهبية وسطح خشب الجوز)
             const deskGroup = new THREE.Group();
             deskGroup.position.set(0, 0, -2.5);
 
-            const deskBody = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.95, 0.9), emeraldWallMat);
-            deskBody.position.y = 0.475;
+            const deskBody = new THREE.Mesh(
+                new THREE.BoxGeometry(3.4, 0.92, 0.85),
+                new THREE.MeshLambertMaterial({ map: createModernDeskTexture() })
+            );
+            deskBody.position.y = 0.46;
             deskGroup.add(deskBody);
 
-            const deskTop = new THREE.Mesh(new THREE.BoxGeometry(2.95, 0.08, 1.05), woodMat);
-            deskTop.position.y = 0.98;
+            const deskTop = new THREE.Mesh(new THREE.BoxGeometry(3.52, 0.08, 0.98), walnutWoodMat);
+            deskTop.position.y = 0.96;
             deskGroup.add(deskTop);
 
-            const deskGoldTrim = new THREE.Mesh(new THREE.BoxGeometry(2.84, 0.12, 0.93), goldMat);
-            deskGoldTrim.position.y = 0.78;
+            const deskGoldTrim = new THREE.Mesh(new THREE.BoxGeometry(3.46, 0.05, 0.92), goldMat);
+            deskGoldTrim.position.y = 0.91;
             deskGroup.add(deskGoldTrim);
 
-            // برواز شاشة الكمبيوتر على مكتب الاستقبال
-            const stand = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.25, 0.12), goldMat);
-            stand.position.set(0, 1.12, 0.1);
-            deskGroup.add(stand);
+            const deskPlinth = new THREE.Mesh(new THREE.BoxGeometry(3.44, 0.07, 0.88), goldMat);
+            deskPlinth.position.y = 0.035;
+            deskGroup.add(deskPlinth);
 
-            const monitorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.55, 0.05), goldMat);
-            monitorFrame.position.set(0, 1.42, 0.09);
-            deskGroup.add(monitorFrame);
+            // شاشات الحاسوب على المكتب
+            [-1.0, 0, 1.0].forEach((mx) => {
+                const stand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.22, 0.1), goldMat);
+                stand.position.set(mx, 1.1, 0.05);
+                deskGroup.add(stand);
 
-            const monitorScreen = new THREE.Mesh(
-                new THREE.PlaneGeometry(0.88, 0.48),
-                new THREE.MeshBasicMaterial({ map: createMonitorTexture() })
-            );
-            monitorScreen.position.set(0, 1.42, 0.12);
-            deskGroup.add(monitorScreen);
+                const monitorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.44, 0.04), goldMat);
+                monitorFrame.position.set(mx, 1.36, 0.04);
+                deskGroup.add(monitorFrame);
 
-            // كراسي المدير والاستقبال (مكبرة وبألوان الصور المطلوبة)
+                const monitorScreen = new THREE.Mesh(
+                    new THREE.PlaneGeometry(0.69, 0.38),
+                    new THREE.MeshBasicMaterial({ map: createMonitorTexture() })
+                );
+                monitorScreen.position.set(mx, 1.36, 0.065);
+                deskGroup.add(monitorScreen);
+            });
+
+            // كرسي المكتب الرئيسي
             const mgrSeat = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.14, 0.75), chairMat);
-            mgrSeat.position.set(0, 0.52, -0.85);
+            mgrSeat.position.set(0, 0.52, -0.82);
             deskGroup.add(mgrSeat);
 
-            const mgrBack = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.95, 0.14), chairMat);
-            mgrBack.position.set(0, 1.0, -1.2);
+            const mgrBack = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.9, 0.14), chairMat);
+            mgrBack.position.set(0, 0.98, -1.16);
             deskGroup.add(mgrBack);
 
-            const mgrBase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.28, 0.5, 10), goldMat);
-            mgrBase.position.set(0, 0.25, -0.85);
+            const mgrBase = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.26, 0.5, 10), goldMat);
+            mgrBase.position.set(0, 0.25, -0.82);
             deskGroup.add(mgrBase);
 
             scene.add(deskGroup);
 
-            // Visitor Seating Area & Coffee Table (مكبرة وبنفس لون الكراسي المطلوبة)
+            // دالة إنشاء كرسي استقبال / زوار
             function createVisitorChair(x, z, rotY) {
                 const chair = new THREE.Group();
-                const seat = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.16, 0.75), chairMat);
+                const seat = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.15, 0.72), chairMat);
                 seat.position.y = 0.45;
                 chair.add(seat);
 
-                const back = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.65, 0.14), chairMat);
-                back.position.set(0, 0.78, -0.3);
+                const back = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.62, 0.14), chairMat);
+                back.position.set(0, 0.76, -0.28);
                 chair.add(back);
 
-                const armL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.35, 0.75), woodMat);
-                armL.position.set(-0.38, 0.62, 0);
+                const armL = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.32, 0.72), lightWoodMat);
+                armL.position.set(-0.36, 0.6, 0);
                 chair.add(armL);
 
-                const armR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.35, 0.75), woodMat);
-                armR.position.set(0.38, 0.62, 0);
+                const armR = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.32, 0.72), lightWoodMat);
+                armR.position.set(0.36, 0.6, 0);
                 chair.add(armR);
 
                 chair.position.set(x, 0, z);
@@ -980,14 +1370,21 @@
                 scene.add(chair);
             }
 
-            createVisitorChair(-2.5, 1.2, Math.PI / 2);
-            createVisitorChair(-2.5, 2.5, Math.PI / 2);
+            // كراسي أمام طاولة المكتب مباشرة
+            createVisitorChair(-0.75, -1.55, Math.PI);
+            createVisitorChair( 0.75, -1.55, Math.PI);
 
-            const coffeeTop = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.06, 1.5), woodMat);
-            coffeeTop.position.set(-1.55, 0.45, 1.85);
+            // صف كراسي الاستقبال في الصالة
+            createVisitorChair(-2.6,  0.4, Math.PI / 2);
+            createVisitorChair(-2.6,  1.6, Math.PI / 2);
+            createVisitorChair(-2.6,  2.8, Math.PI / 2);
+
+            // طاولة ضيافة جانبية بين كراسي الاستقبال
+            const coffeeTop = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.06, 1.5), walnutWoodMat);
+            coffeeTop.position.set(-1.65, 0.45, 1.6);
             scene.add(coffeeTop);
             const coffeeLeg = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.42, 1.1), goldMat);
-            coffeeLeg.position.set(-1.55, 0.21, 1.85);
+            coffeeLeg.position.set(-1.65, 0.21, 1.6);
             scene.add(coffeeLeg);
 
             let isDragging = false, prevX = 0;
